@@ -26,6 +26,27 @@ __author__ = 'jlevy'
 def read_login_info(username=None):
   if not username:
     username = eval(input("GitHub username: "))
+from __future__ import print_function
+
+__author__ = 'jlevy'
+
+import logging as log
+import sys
+import json
+import yaml
+import inspect
+import getpass
+from collections import namedtuple
+from functools32 import lru_cache  # functools32 pip
+import github3  # github3.py pip
+
+import configs
+import commands
+
+
+def read_login_info(username=None):
+  if not username:
+    username = raw_input("GitHub username: ")
   return (username, getpass.getpass())
 
 
@@ -56,6 +77,7 @@ def format_to_string(obj, format=None):
     return yaml.safe_dump(obj, default_style='"')
   else:
     raise AssertionError("Invalid format: %s" % format)
+    raise ValueError("format: %s" % format)
 
 
 def print_formatter(format=None):
@@ -68,6 +90,8 @@ def print_formatter(format=None):
 
 # All data used by the run of a command.
 Config = namedtuple("Config", "github repo formatter")
+# The configuration to run.
+Config = namedtuple("Config", "repo formatter dry_run")
 
 
 def _to_dash(name):
@@ -121,6 +145,17 @@ def command_directory(use_dashes=True):
 @lru_cache()
 def list_commands(use_dashes=True):
   return [command for (module, command, doc) in command_directory(use_dashes=use_dashes)]
+def all_command_functions():
+  def is_public_func(f):
+    return inspect.isfunction(f) and not f.__name__.startswith("_")
+
+  return inspect.getmembers(commands, predicate=is_public_func)
+
+
+@lru_cache()
+def list_commands(use_dashes=False):
+  transform = _to_dash if use_dashes else lambda x: x
+  return [transform(name) for (name, func) in all_command_functions()]
 
 
 def get_command_func(command):
@@ -128,6 +163,9 @@ def get_command_func(command):
   if not command in all_command_functions():
     raise ValueError("invalid command: %s" % command)
   return all_command_functions()[command]
+  if not command in list_commands():
+    raise ValueError("invalid command: %s" % command)
+  return getattr(commands, command)
 
 
 def run_command(command, config, args):
@@ -145,4 +183,11 @@ def run_command(command, config, args):
 # TODO:
 # Control pretty-printing, using one object per line by default, but with --pretty option to print nicely
 # Proper reading of JSON streams (as opposed to line-by-line), for use in piping
+  log.info("Command '%s' with config: %s", args.command, config)
+  log.info("Args: %s", args)
+  command_func(config, args)
+
+# TODO:
+# Automagic loading of ghizmo_commands.py files from current directory.
+# Proper streaming of JSON items (as opposed to line-by-line), for use in piping.
 # Prettier SIGPIPE handling

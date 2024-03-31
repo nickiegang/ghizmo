@@ -2,6 +2,10 @@
 Ghizmo config handling.
 """
 
+from __future__ import print_function
+
+__author__ = 'jlevy'
+
 import logging as log
 import os
 import re
@@ -11,6 +15,7 @@ import subprocess
 from functools import lru_cache
 
 __author__ = 'jlevy'
+from functools32 import lru_cache  # functools32 pip
 
 CONFIG_FILENAME = ".ghizmo.yml"
 
@@ -45,11 +50,13 @@ def _extract_github_repo_info(url):
 
 
 def infer_repo(remote_name="origin"):
+def infer_repo():
   """
   Extract the current repository info, if available, using .git/config in current working directory.
   """
   log.info("Checking in cwd for git dirctory: %s", os.getcwd())
   remote_url = bytes.decode(subprocess.check_output(["git", "config", "--get", "remote.%s.url" % remote_name]))
+  remote_url = subprocess.check_output("git config --get remote.origin.url", shell=True)
   (owner, repo_name) = _extract_github_repo_info(remote_url)
   log.info("Inferred repository: %s/%s", owner, repo_name)
   return (owner, repo_name)

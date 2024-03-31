@@ -13,6 +13,7 @@ setup(
   url="https://github.com/jlevy/ghizmo",
   # Pinning uritemplate dep; see https://github.com/sigmavirus24/github3.py/issues/634
   install_requires=["github3.py>=1.0.0a4", "PyYAML>=3.12", "uritemplate.py==2.0.0"],
+  install_requires=["github3.py>=1.0.0a2", "PyYAML>=3.11", "functools32>=3.2.3"],
   description=main.DESCRIPTION,
   long_description=main.LONG_DESCRIPTION,
   classifiers=[
@@ -26,6 +27,7 @@ setup(
     'Operating System :: POSIX',
     'Operating System :: Unix',
     'Programming Language :: Python :: 3.6',
+    'Programming Language :: Python :: 2.7',
     'Topic :: Utilities',
     'Topic :: Software Development'
   ],
