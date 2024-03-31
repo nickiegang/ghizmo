@@ -35,7 +35,7 @@ Run `ghizmo --help` for a list of commands -- and see below on how to add new co
 
 Basic access to API, showing responses in JSON:
 
-```bash
+```
 $ ghizmo tags --repo torvalds/linux
 {
   "commit": {
@@ -49,10 +49,15 @@ $ ghizmo tags --repo torvalds/linux
 ...
 ```
 
+<<<<<<< ours
 The advantage to JSON is it's easy to combine with other tools.
 Here's a histogram of number contributions for all Linux kernel contributors:
 
 ```bash
+=======
+Combine with other tools:
+```
+>>>>>>> theirs
 $ ghizmo tags --repo torvalds/linux | jq '.tarball_url' | head -1
 "https://api.github.com/repos/torvalds/linux/tarball/v4.2-rc8"
 ...
@@ -68,8 +73,7 @@ $ ghizmo contributors --repo torvalds/linux | jq '.contributions' | histogram.py
 ```
 
 You may skip the `--repo` option and Ghizmo will infer the current repository if you are in a working directory with a GitHub origin:
-
-```bash
+```
 $ ghizmo branches
 {
   "commit": {
@@ -108,6 +112,7 @@ It's also helpful for scripting releases:
 $ ghizmo create-release -a name=0.9.99 -a tag_name=0.9.99 -a prerelease=true
 ```
 
+<<<<<<< ours
 ### A more complex example
 
 If you've ever had a messy GitHub repository to clean up, you might like this command,
@@ -124,21 +129,38 @@ $ jq '.head_branch' stale-pr-branches.json | ghizmo delete-branches --dry-run
   "message": "Deleted heads/aaa",
   "dry_run": true
 }
-...
-$ jq '.head_branch' stale-pr-branches.json | ghizmo delete-branches
+=======
+More complex c### A more complex example
+
+If you've ever had a messy GitHub repository to clean up, you might like this command,
+which looks for non-deleted branches on closed PRs.
+```bash
+$ ghizmo stale-pr-branches > stale-pr-branches.json
+```
+
+You edit/review that file, then test and perform deletions:
+
+```
+$ jq '.head_branch' stale-pr-branches.json | ghizmo delete-branches --dry-run
 {
   "message": "Deleted heads/aaa",
-  "dry_run": false
+  "dry_run": true
+}
+>>>>>>>+ours
+y_run": false
 }
 ...
 ```
 
+<<<<<<< ours
 ### Tracking contributors
 
 Another command of interest may be `assemble-authors`.
 It looks at GitHub history and creates an `AUTHORS.md` file, also including role information and additional configurable headers and footers. See [this example](https://github.com/jlevy/the-art-of-command-line/blob/master/AUTHORS.md).
 
 
+=======
+>>>>>>> theirs
 ## Installation
 
 Requires Python 2.7+. Then (with sudo if desired):
@@ -147,18 +169,17 @@ Requires Python 2.7+. Then (with sudo if desired):
 pip install ghizmo
 ```
 
-Ghizmo benefits if `git` is in your path so it can auto-detect your repository config.
-You may also want to install tools like
-[`jq`](https://github.com/stedolan/jq) or [data_hacks](https://github.com/bitly/data_hacks)
-so you can perform operations such as the ones above that process JSON outputs.
+Ghizmo benefit### Tracking contributors
+
+Another command of interest may be `assemble-authors`.
+It looks at GitHub history and creates an `AUTHORS.md` file, also including role information and additional configurable headers and footers. See [this example](https://github.com/jlevy/the-art-of-command-line/blob/master/AUTHORS.md).
 
 
-## Configuration
-
-You can supply username and password from the command line, but you probably want to be able to use APIs without typing your
+>>>>>>>+ours
+ password from the command line, but you probably want to be able to use APIs without typing your
 password. To do this, create a `~/.ghizmo.yml` file:
 
-```yaml
+```
 # Ghizmo configuration
 # Default GitHub login name:
 username: my-github-id
@@ -168,6 +189,7 @@ access_token: aaaaaaaaaabbbbbbbbbbbccccccccc1234567890
 
 Create an access token on [your GitHub settings page](https://github.com/settings/tokens) to use with Ghizmo.
 
+<<<<<<< ours
 ## Custom commands
 
 To add a new command, create a file `ghizmo_commands.py` in your current directory.
@@ -220,6 +242,8 @@ and your teammates can then use the same commands.
 This means you can automate setup and configuration of GitHub repositories, teams, etc. in a flexible way.
 If there're generally useful, please submit a PR and I'll gladly merge it for use by everyone.
 
+=======
+>>>>>>> theirs
 ## Maturity
 
 Mostly a one-day hack. Could be extended a lot, but seems to work.

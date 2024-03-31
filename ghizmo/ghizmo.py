@@ -2,9 +2,6 @@
 Ghizmo main library.
 """
 
-from __future__ import print_function
-
-__author__ = 'jlevy'
 
 import logging as log
 import sys
@@ -12,22 +9,25 @@ import re
 import json
 import yaml
 import inspect
-import os
-import importlib
 import getpass
 from collections import namedtuple
+<<<<<<<-ours
 from collections import OrderedDict
+from functools import lru_cache
+=======
 from functools32 import lru_cache  # functools32 pip
+>>>>>>>-theirs
 import github3  # github3.py pip
 from github3.null import NullObject
 
-import configs
-import commands
+from ghizmo import configs
+from ghizmo import commands
 
+__author__ = 'jlevy'
 
 def read_login_info(username=None):
   if not username:
-    username = raw_input("GitHub username: ")
+    username = eval(input("GitHub username: "))
   return (username, getpass.getpass())
 
 
@@ -80,16 +80,11 @@ def _to_underscore(name):
   return name.replace("-", "_")
 
 
-def _is_public_func(f):
-  return inspect.isfunction(f) and not f.__name__.startswith("_")
-
-
-@lru_cache()
 def all_command_functions():
-  # TODO: Clean this up somehow.
-  # Use absolute module path so it works post installation.
-  modules = [importlib.import_module("ghizmo.commands.%s" % module) for module in commands.__all__]
+  def is_public_func(f):
+    return inspect.isfunction(f) and not f.__name__.startswith("_")
 
+<<<<<<< ours
   # If there is a ghizmo_commands.py file in the current directory, use it too.
   if os.path.exists("ghizmo_commands.py"):
     sys.path.insert(1, '.')  # This is needed only on some installations.
@@ -104,7 +99,10 @@ def all_command_functions():
         raise ValueError("Duplicate function name for command: %s" % name)
       func_map[name] = func
   # Sort items first by module, then by name.
-  return OrderedDict(sorted(func_map.items(), key=lambda (name, func): (func.__module__, name)))
+  return OrderedDict(sorted(list(func_map.items()), key=lambda name_func: (name_func[1].__module__, name_func[0])))
+=======
+  return inspect.getmembers(commands, predicate=is_public_func)
+>>>>>>>-theirs
 
 
 @lru_cache()
@@ -116,20 +114,24 @@ def command_directory(use_dashes=True):
     return doc
 
   transform = _to_dash if use_dashes else lambda x: x
+<<<<<<<-ours
   return [(func.__module__, transform(name), doc_for_function(func)) for (name, func) in
-          all_command_functions().iteritems()]
+          all_command_functions().items()]
+=======
+  return [(transform(name), doc_for_function(func)) for (name, func) in all_command_functions()]
+>>>>>>>-theirs
 
 
 @lru_cache()
 def list_commands(use_dashes=True):
-  return [command for (module, command, doc) in command_directory(use_dashes=use_dashes)]
+  return [command for (command, doc) in command_directory(use_dashes=use_dashes)]
 
 
 def get_command_func(command):
   command = _to_underscore(command)
-  if not command in all_command_functions():
+  if not command in list_commands(use_dashes=False):
     raise ValueError("invalid command: %s" % command)
-  return all_command_functions()[command]
+  return getattr(commands, command)
 
 
 def run_command(command, config, args):
@@ -139,6 +141,7 @@ def run_command(command, config, args):
   log.info("Args: %s", args)
   # This executes the command step by step, either just to display results, or to display progress
   # on an action with side effects.
+<<<<<<< ours
   iterable_result = command_func(config, args)
   if iterable_result:
     for result in iterable_result:
@@ -147,4 +150,12 @@ def run_command(command, config, args):
 # TODO:
 # Control pretty-printing, using one object per line by default, but with --pretty option to print nicely
 # Proper reading of JSON streams (as opposed to line-by-line), for use in piping
+=======
+  for result in command_func(config, args):
+    config.formatter(result)
+
+# TODO:
+# Automagic loading of ghizmo_commands.py files from current directory.
+# Proper streaming of JSON items (as opposed to line-by-line), for use in piping.
+>>>>>>>-theirs
 # Prettier SIGPIPE handling

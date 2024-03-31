@@ -1,4 +1,15 @@
-from ghizmo.commands import lib
+"""
+Pre-defined commands.
+
+Public functions here (not starting with '_') are auto-registered into Ghizmo's command line.
+
+For GitHub the library API, see: https://github.com/sigmavirus24/github3.py
+"""
+
+from __future__ import print_function
+
+import logging as log
+import command_lib as lib
 
 
 def tags(config, args):
@@ -30,14 +41,6 @@ def branches(config, args):
   List all branches.
   """
   return config.repo.branches()
-
-
-def branches_full(config, args):
-  """
-  List full info about all branches.
-  """
-  for b in config.repo.branches():
-    yield config.repo.branch(b.name)
 
 
 def show_branches(config, args):
@@ -83,7 +86,8 @@ def pull_requests(config, args):
   """
   List all PRs.
   """
-  return config.repo.pull_requests(state=args.get("state", "open"))
+  state = args.state or "open"
+  return config.repo.pull_requests(state=state)
 
 
 def contributors(config, args):
@@ -93,49 +97,20 @@ def contributors(config, args):
   return config.repo.contributors()
 
 
-def contributor_stats(config, args):
+def stale_pr_branches(config, args):
   """
-  List contributor statistics.
+  List "stale" branches that associated with a closed PR and are from the same (non-forked) repository as the base.
   """
-  return config.repo.contributor_statistics()
-
-
-def collaborators(config, args):
-  """
-  List all collaborators.
-  """
-  return config.repo.collaborators()
-
-
-def releases(config, args):
-  """
-  List all releases.
-  """
-  return config.repo.releases()
-
-
-def stargazers(config, args):
-  """
-  List all stargazers.
-  """
-  return config.repo.stargazers()
-
-
-def create_release(config, args):
-  """
-  Create a new release.
-  """
-  yield config.repo.create_release(args.tag_name, name=args.name,
-                                   target_commitish=args.get("target_commitish"), body=args.get("body"),
-                                   draft=args.get_bool("draft"), prerelease=args.get_bool("prerelease"))
-
-
-def issues(config, args):
-  """
-  List issues.
-  """
-  return config.repo.issues(milestone=args.get("milestone"), state=args.get("state"),
-                            assignee=args.get("assignee"), mentioned=args.get("mentioned"),
-                            labels=args.get("labels"), sort=args.get("sort"),
-                            direction=args.get("direction"), since=args.get("since"),
-                            number=args.get("number", -1))
+  repo = config.repo
+  for pr in repo.pull_requests(state="closed"):
+    is_stale = False
+    if pr.head.repo == pr.base.repo:
+      branch = repo.branch(pr.head.ref)
+      if branch:
+        is_stale = True
+    if is_stale:
+      yield {
+        "html_url": pr.html_url,
+        "base_branch": pr.base.ref,
+        "head_branch": pr.head.ref,
+      }

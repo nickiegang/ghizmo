@@ -2,14 +2,18 @@
 Common functions for commands.
 """
 
+<<<<<<< ours:ghizmo/commands/lib.py
+# TODO: Move this module elsewhere?
+=======
 from __future__ import print_function
 
 __author__ = 'jlevy'
-
-# TODO: Move this module elsewhere?
+>>>>>>> theirs:ghizmo/command_lib.py
 
 import sys
 import json
+
+__author__ = 'jlevy'
 
 
 def status(message, dry_run=False):
